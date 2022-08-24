@@ -1,13 +1,13 @@
 # $Id: Makefile,v 1.9 2007-10-22 18:53:12 rich Exp $
 
-#BUILD_ID_NONE := -Wl,--build-id=none 
-BUILD_ID_NONE := 
+#BUILD_ID_NONE := -Wl,--build-id=none
+BUILD_ID_NONE :=
 
 SHELL	:= /bin/bash
 
 all:	jonesforth
 
-jonesforth: jonesforth.S
+jonesforth: jonesforth-x86.S
 	gcc -m32 -nostdlib -static -Wl,-Ttext,0 $(BUILD_ID_NONE) -o $@ $<
 
 run:
@@ -44,7 +44,7 @@ run_perf_dupdrop: jonesforth
 .PHONY: test check run run_perf_dupdrop
 
 remote:
-	scp jonesforth.S jonesforth.f rjones@oirase:Desktop/
+	scp jonesforth-x86.S jonesforth.f rjones@oirase:Desktop/
 	ssh rjones@oirase sh -c '"rm -f Desktop/jonesforth; \
-	  gcc -m32 -nostdlib -static -Wl,-Ttext,0 -o Desktop/jonesforth Desktop/jonesforth.S; \
+	  gcc -m32 -nostdlib -static -Wl,-Ttext,0 -o Desktop/jonesforth Desktop/jonesforth-x86.S; \
 	  cat Desktop/jonesforth.f - | Desktop/jonesforth arg1 arg2 arg3"'
