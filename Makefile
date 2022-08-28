@@ -1,14 +1,22 @@
 # $Id: Makefile,v 1.9 2007-10-22 18:53:12 rich Exp $
 
-#BUILD_ID_NONE := -Wl,--build-id=none
-BUILD_ID_NONE :=
+CC = gcc
+ASFLAGS = $(ARCH_ASFLAGS) -nostdlib -static $(BUILD_ID_NONE)
+#BUILD_ID_NONE = -Wl,--build-id=none
+BUILD_ID_NONE =
 
-SHELL	:= /bin/bash
+SHELL = /bin/bash
 
-all:	jonesforth
+all: jonesforth
 
-jonesforth: jonesforth-x86.S
-	gcc -m32 -nostdlib -static $(BUILD_ID_NONE) -o $@ $<
+ARCH := $(shell uname -m) 
+ARCH := $(subst x86_64,x86,$(ARCH))
+ifeq ($(ARCH),x86)
+ARCH_ASFLAGS = -m32
+endif
+
+jonesforth: jonesforth-$(ARCH).S
+	$(AS) $(ASFLAGS) -o $@ $<
 
 run:
 	cat jonesforth.f $(PROG) - | ./jonesforth
@@ -44,7 +52,7 @@ run_perf_dupdrop: jonesforth
 .PHONY: test check run run_perf_dupdrop
 
 remote:
-	scp jonesforth-x86.S jonesforth.f rjones@oirase:Desktop/
+	scp jonesforth-$(ARCH).S jonesforth.f rjones@oirase:Desktop/
 	ssh rjones@oirase sh -c '"rm -f Desktop/jonesforth; \
-	  gcc -m32 -nostdlib -static -Wl,-Ttext,0 -o Desktop/jonesforth Desktop/jonesforth-x86.S; \
+	  gcc -m32 -nostdlib -static -Wl,-Ttext,0 -o Desktop/jonesforth Desktop/jonesforth-$(ARCH).S; \
 	  cat Desktop/jonesforth.f - | Desktop/jonesforth arg1 arg2 arg3"'
